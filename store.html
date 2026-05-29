@@ -298,17 +298,31 @@
 
     </div>
 
-    <script>
+    <!-- Firebase Integration -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, get, child } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDKh9nmIeyDRGPWvn2sr49klT-I2zd298s",
+            authDomain: "mojang-studios-2dcd1.firebaseapp.com",
+            databaseURL: "https://mojang-studios-2dcd1-default-rtdb.firebaseio.com/",
+            projectId: "mojang-studios-2dcd1",
+            storageBucket: "mojang-studios-2dcd1.firebasestorage.app",
+            messagingSenderId: "463020540404",
+            appId: "1:463020540404:web:1032bb6c2618b93b91f9a1"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
         let verifiedUser = "";
         let playerTotalVotes = 0;
 
-        function verifyStoreLogin() {
+        window.verifyStoreLogin = function() {
             let uName = document.getElementById('store-name').value.trim().toLowerCase();
             let pPass = document.getElementById('store-pass').value.trim();
             let statusDiv = document.getElementById('status-msg');
-
-            // Vote එකේ හදපු accounts database එක LocalStorage එකෙන් ගන්නවා
-            let playerAccounts = JSON.parse(localStorage.getItem('mojang_player_accounts')) || {};
 
             if (uName === "" || pPass === "") {
                 statusDiv.className = "status-msg error";
@@ -316,40 +330,40 @@
                 return;
             }
 
-            // Account එකක් තියෙනවද සහ Password එක හරිද බලනවා
-            if (playerAccounts[uName] && playerAccounts[uName] === pPass) {
-                verifiedUser = uName;
-                statusDiv.innerText = "";
-                document.getElementById('login-box').style.display = 'none'; // Login Box එක හංගනවා
-                document.getElementById('stats-bar').style.display = 'block'; // Stats Bar එක පෙන්වනවා
-                document.getElementById('display-player').innerText = verifiedUser.toUpperCase();
-                
-                document.getElementById('store-box-grid').classList.add('active-grid'); // Store එක open කරනවා
-                
-                calculateTotalVotes();
-                setupStoreUI();
-            } else {
-                statusDiv.className = "status-msg error";
-                statusDiv.innerText = "INVALID USERNAME OR PASSWORD! VOTE FIRST.";
-            }
-        }
-
-        function calculateTotalVotes() {
-            // Vote සයිට් එකේ සේව් වුණු මුළු සර්වර් Votes Database එක
-            let serverVotes = JSON.parse(localStorage.getItem('mojang_server_votes')) || {};
-            playerTotalVotes = 0;
-
-            // සයිට් 5න්ම මේ යූසර්ට ලැබිලා තියෙන Votes ඔක්කොම එකතු කරනවා
-            for (let site in serverVotes) {
-                if (serverVotes[site][verifiedUser]) {
-                    playerTotalVotes += serverVotes[site][verifiedUser];
+            const dbRef = ref(database);
+            // Firebase එකෙන් එකවුන්ට් එක තියෙනවද බලනවා
+            get(child(dbRef, `mojang_player_accounts/${uName}`)).then((snapshot) => {
+                if (snapshot.exists() && snapshot.val() === pPass) {
+                    verifiedUser = uName;
+                    statusDiv.innerText = "";
+                    document.getElementById('login-box').style.display = 'none';
+                    document.getElementById('stats-bar').style.display = 'block';
+                    document.getElementById('display-player').innerText = verifiedUser.toUpperCase();
+                    document.getElementById('store-box-grid').classList.add('active-grid');
+                    
+                    // Vote විස්තර Firebase එකෙන් අරන් Points ගණන් හැදීම
+                    get(child(dbRef, 'mojang_server_votes')).then((voteSnapshot) => {
+                        let serverVotes = voteSnapshot.exists() ? voteSnapshot.val() : {};
+                        playerTotalVotes = 0;
+                        for (let site in serverVotes) {
+                            if (serverVotes[site][verifiedUser]) {
+                                playerTotalVotes += serverVotes[site][verifiedUser];
+                            }
+                        }
+                        document.getElementById('total-points').innerText = playerTotalVotes;
+                        setupStoreUI();
+                    });
+                } else {
+                    statusDiv.className = "status-msg error";
+                    statusDiv.innerText = "INVALID USERNAME OR PASSWORD! VOTE FIRST.";
                 }
-            }
-            document.getElementById('total-points').innerText = playerTotalVotes;
+            }).catch(() => {
+                statusDiv.className = "status-msg error";
+                statusDiv.innerText = "DATABASE ERROR!";
+            });
         }
 
         function setupStoreUI() {
-            // Ranks වල දත්ත සැකසුම්
             const ranks = [
                 { id: 'vip', target: 250, btn: document.getElementById('btn-vip'), bar: document.getElementById('bar-vip'), txt: document.getElementById('text-vip') },
                 { id: 'team', target: 200, btn: document.getElementById('btn-team'), bar: document.getElementById('bar-team'), txt: document.getElementById('text-team') },
@@ -357,14 +371,12 @@
             ];
 
             ranks.forEach(rank => {
-                // Progress ප්‍රතිශතය හැදීම
                 let percentage = (playerTotalVotes / rank.target) * 100;
                 if (percentage > 100) percentage = 100;
 
                 rank.bar.style.width = percentage + "%";
                 rank.txt.innerText = playerTotalVotes + " / " + rank.target;
 
-                // අවශ්‍ය ඡන්ද ප්‍රමාණය සම්පූර්ණ නම් Button එක Unlock කරනවා
                 if (playerTotalVotes >= rank.target) {
                     rank.btn.innerText = "CLAIM RANK";
                     rank.btn.classList.add('unlocked-btn');
@@ -375,30 +387,23 @@
             });
         }
 
-        function claimRank(rankName, cost) {
+        window.claimRank = function(rankName, cost) {
             if (playerTotalVotes < cost) {
                 alert("You don't have enough Vote Points!");
                 return;
             }
-
-            // Green Confetti Animation එක සක්‍රීය කිරීම
             triggerConfettiEffect();
-
-            // Success Message එක පෙන්වීම
             alert("🎉 CONGRATULATIONS! 🎉\n\nYou successfully claimed the " + rankName.toUpperCase() + " rank!\n\n👉 PLEASE CONTACT ADMIN ON DISCORD WITH YOUR SCREENSHOT TO ACTIVATE IT.");
         }
 
-        // කොළ පාට කැබලි අහසින් වැටෙන සුපිරි Animation එක
         function triggerConfettiEffect() {
             for (let i = 0; i < 100; i++) {
                 let confettiNode = document.createElement('div');
                 confettiNode.className = 'confetti';
                 confettiNode.style.left = Math.random() * 100 + 'vw';
                 confettiNode.style.animationDelay = Math.random() * 2 + 's';
-                confettiNode.style.backgroundColor = '#' + Math.floor(Math.random()*16777215).toString(16); // Random Colors
+                confettiNode.style.backgroundColor = '#' + Math.floor(Math.random()*16777215).toString(16);
                 document.body.appendChild(confettiNode);
-
-                // තත්පර 4කට පස්සේ ඒවා අයින් කරනවා
                 setTimeout(() => { confettiNode.remove(); }, 4000);
             }
         }

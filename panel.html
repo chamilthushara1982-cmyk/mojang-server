@@ -239,84 +239,87 @@
 
     </div>
 
-    <script>
-        function checkAdminLogin() {
+    <!-- Firebase Admin Script -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDKh9nmIeyDRGPWvn2sr49klT-I2zd298s",
+            authDomain: "mojang-studios-2dcd1.firebaseapp.com",
+            databaseURL: "https://mojang-studios-2dcd1-default-rtdb.firebaseio.com/",
+            projectId: "mojang-studios-2dcd1",
+            storageBucket: "mojang-studios-2dcd1.firebasestorage.app",
+            messagingSenderId: "463020540404",
+            appId: "1:463020540404:web:1032bb6c2618b93b91f9a1"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        window.checkAdminLogin = function() {
             let user = document.getElementById('admin-user').value.trim();
             let pass = document.getElementById('admin-pass').value.trim();
-            let errorDiv = document.getElementById('error-output');
+            let errOut = document.getElementById('error-output');
 
-            // ඔයා දුන්න නිවැරදි ඇඩ්මින් ලොගින් විස්තර
-            if (user === "Admin123" && pass === "Koc574501") {
-                errorDiv.innerText = "";
-                document.getElementById('admin-login-gate').style.display = 'none'; // Login එක හංගනවා
-                document.getElementById('admin-dashboard').style.display = 'block'; // Dashboard එක අරිනවා
-                
-                loadServerData(); // සේවාදායකයන්ගේ දත්ත Load කරනවා
+            // Admin Login Credentials (නව Username සහ Password එක මෙතනට යාවත්කාලීන කර ඇත)
+            if (user.toLowerCase() === "admin123" && pass === "Koc574501") {
+                document.getElementById('admin-login-gate').style.display = "none";
+                document.getElementById('admin-dashboard').style.display = "block";
+                loadDashboardLive();
             } else {
-                errorDiv.innerText = "ACCESS DENIED: INVALID ADMIN CREDENTIALS!";
+                errOut.innerText = "ACCESS DENIED: INVALID ADMIN CREDENTIALS!";
             }
         }
 
-        function loadServerData() {
-            // LocalStorage වලින් Accounts සහ Votes දත්ත ලබාගැනීම
-            let playerAccounts = JSON.parse(localStorage.getItem('mojang_player_accounts')) || {};
-            let serverVotes = JSON.parse(localStorage.getItem('mojang_server_votes')) || {
-                play: {}, gift: {}, rank: {}, rule: {}, sponser: {}
-            };
+        function loadDashboardLive() {
+            // Live ලියාපදිංචි ප්ලේයර්ස්ලා ප්‍රමාණය ගැනීම
+            onValue(ref(database, 'mojang_player_accounts'), (accountsSnapshot) => {
+                let accounts = accountsSnapshot.exists() ? accountsSnapshot.val() : {};
+                let totalPlayers = Object.keys(accounts).length;
+                document.getElementById('stat-players').innerText = totalPlayers;
 
-            let tableBody = document.getElementById('player-table-body');
-            tableBody.innerHTML = ""; // පරණ දත්ත ක්ලියර් කිරීම
+                // Live Votes දත්ත අරන් Table එක ලස්සනට අප්ඩේට් කිරීම
+                onValue(ref(database, 'mojang_server_votes'), (votesSnapshot) => {
+                    let serverVotes = votesSnapshot.exists() ? votesSnapshot.val() : { play: {}, gift: {}, rank: {}, rule: {}, sponser: {} };
+                    let tableBody = document.getElementById('player-table-body');
+                    tableBody.innerHTML = "";
 
-            let totalPlayersCount = 0;
-            let totalServerVotesCount = 0;
+                    let grandTotalVotes = 0;
 
-            // හැම Player කෙනෙක්වම එකින් එක Check කිරීම
-            for (let player in playerAccounts) {
-                totalPlayersCount++;
+                    // හැම ප්ලේයර් කෙනෙකුටම අදාළව Row එකක් හැදීම
+                    for (let pName in accounts) {
+                        let playV = (serverVotes.play && serverVotes.play[pName]) || 0;
+                        let giftV = (serverVotes.gift && serverVotes.gift[pName]) || 0;
+                        let rankV = (serverVotes.rank && serverVotes.rank[pName]) || 0;
+                        let ruleV = (serverVotes.rule && serverVotes.rule[pName]) || 0;
+                        let sponserV = (serverVotes.sponser && serverVotes.sponser[pName]) || 0;
 
-                // එක් එක් සයිට් එකට අදාළ ඡන්ද ගණන් ගැනීම
-                let vPlay = serverVotes['play'][player] || 0;
-                let vGift = serverVotes['gift'][player] || 0;
-                let vRank = serverVotes['rank'][player] || 0;
-                let vRule = serverVotes['rule'][player] || 0;
-                let vSponser = serverVotes['sponser'][player] || 0;
+                        let totalP = playV + giftV + rankV + ruleV + sponserV;
+                        grandTotalVotes += totalP;
 
-                let playerTotal = vPlay + vGift + vRank + vRule + vSponser;
-                totalServerVotesCount += playerTotal;
+                        // Eligible Ranks Badges සෑදීම
+                        let badges = "";
+                        if (totalP >= 250) badges += '<span class="badge badge-vip">VIP</span>';
+                        if (totalP >= 200) badges += '<span class="badge badge-team">TEAM</span>';
+                        if (totalP >= 150) badges += '<span class="badge badge-18">18+</span>';
+                        if (badges === "") badges = '<span class="badge-none">NONE</span>';
 
-                // Rank එක Unlock වෙලාද නැද්ද බලන එක (Store එකේ ගණන් වලට අනුව)
-                let rankBadges = "";
-                if (playerTotal >= 150) rankBadges += '<span class="badge badge-18">🔞 18+</span>';
-                if (playerTotal >= 200) rankBadges += '<span class="badge badge-team">🛡️ Team</span>';
-                if (playerTotal >= 250) rankBadges += '<span class="badge badge-vip">👑 VIP</span>';
-                
-                if (rankBadges === "") {
-                    rankBadges = '<span class="badge-none">No Ranks Yet</span>';
-                }
-
-                // Table එකට අලුත් පේළියක් (Row) එකතු කිරීම
-                let row = `<tr>
-                    <td style="color: #5865F2; font-weight: bold;">${player.toUpperCase()}</td>
-                    <td>${vPlay}</td>
-                    <td>${vGift}</td>
-                    <td>${vRank}</td>
-                    <td>${vRule}</td>
-                    <td>${vSponser}</td>
-                    <td style="color: #ff3131; font-weight: bold; font-size: 11px;">${playerTotal}</td>
-                    <td>${rankBadges}</td>
-                </tr>`;
-                
-                tableBody.innerHTML += row;
-            }
-
-            // උඩ තියෙන Summary කාඩ් වලට ගණන් අප්ඩේට් කිරීම
-            document.getElementById('stat-players').innerText = totalPlayersCount;
-            document.getElementById('stat-votes').innerText = totalServerVotesCount;
-
-            // කිසිම ප්ලේයර් කෙනෙක් නැත්නම් මැසේජ් එකක් පෙන්වීම
-            if (totalPlayersCount === 0) {
-                tableBody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:#555; padding:30px;">NO PLAYER DATA FOUND IN DATABASE.</td></tr>`;
-            }
+                        let row = `<tr>
+                            <td>${pName.toUpperCase()}</td>
+                            <td>${playV}</td>
+                            <td>${giftV}</td>
+                            <td>${rankV}</td>
+                            <td>${ruleV}</td>
+                            <td>${sponserV}</td>
+                            <td style="color: #ff3131; font-weight: bold;">${totalP}</td>
+                            <td>${badges}</td>
+                        </tr>`;
+                        tableBody.innerHTML += row;
+                    }
+                    document.getElementById('stat-votes').innerText = grandTotalVotes;
+                });
+            });
         }
     </script>
 

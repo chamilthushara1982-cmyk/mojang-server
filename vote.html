@@ -219,21 +219,50 @@
 
     </div>
 
-    <script>
-        let currentUsername = "";
+    <!-- Firebase Configuration & Realtime Script -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, set, get, child, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-        // Accounts Database එක (Username -> Password සේව් කරගන්න)
-        let playerAccounts = JSON.parse(localStorage.getItem('mojang_player_accounts')) || {};
-
-        // මුළු සර්වර් එකේම Vote Counts ටික බලාගන්න එක
-        let serverVotes = JSON.parse(localStorage.getItem('mojang_server_votes')) || {
-            play: {}, gift: {}, rank: {}, rule: {}, sponser: {}
+        const firebaseConfig = {
+            apiKey: "AIzaSyDKh9nmIeyDRGPWvn2sr49klT-I2zd298s",
+            authDomain: "mojang-studios-2dcd1.firebaseapp.com",
+            databaseURL: "https://mojang-studios-2dcd1-default-rtdb.firebaseio.com/",
+            projectId: "mojang-studios-2dcd1",
+            storageBucket: "mojang-studios-2dcd1.firebasestorage.app",
+            messagingSenderId: "463020540404",
+            appId: "1:463020540404:web:1032bb6c2618b93b91f9a1"
         };
 
-        // User කෙනෙක් අන්තිමට Vote කරපු වෙලාවල් සටහන
-        let userVoteLog = JSON.parse(localStorage.getItem('mojang_user_vote_log')) || {};
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
 
-        function handleAuth() {
+        let currentUsername = "";
+        let serverVotes = { play: {}, gift: {}, rank: {}, rule: {}, sponser: {} };
+        let userVoteLog = {};
+
+        // ඩේටාබේස් එකෙන් Live Vote දත්ත ලබා ගැනීම
+        const votesRef = ref(database, 'mojang_server_votes');
+        onValue(votesRef, (snapshot) => {
+            if (snapshot.exists()) {
+                serverVotes = snapshot.val();
+                // හැම වෙලේම Array Structure එක නිවැරදිව තියාගන්න ආරක්ෂිත පියවරක්
+                ['play', 'gift', 'rank', 'rule', 'sponser'].forEach(site => {
+                    if (!serverVotes[site]) serverVotes[site] = {};
+                });
+            }
+            updateUI();
+        });
+
+        // ඩේටාබේස් එකෙන් Live Vote Logs ලබා ගැනීම
+        const logsRef = ref(database, 'mojang_user_vote_log');
+        onValue(logsRef, (snapshot) => {
+            if (snapshot.exists()) {
+                userVoteLog = snapshot.val();
+            }
+        });
+
+        window.handleAuth = function() {
             let inputName = document.getElementById('mc-username').value.trim().toLowerCase();
             let inputPassword = document.getElementById('mc-password').value.trim();
             let statusDiv = document.getElementById('status-msg');
@@ -244,23 +273,28 @@
                 return;
             }
 
-            // එකම නමකින් දැනටමත් Account එකක් තියෙනවද බලනවා
-            if (playerAccounts[inputName]) {
-                // Account එකක් තියෙනවා නම් Password එක හරිද බලනවා (LOGIN)
-                if (playerAccounts[inputName] === inputPassword) {
-                    currentUsername = inputName;
-                    activateVoting("LOGIN SUCCESSFUL! WELCOME BACK.", true);
+            const dbRef = ref(database);
+            get(child(dbRef, `mojang_player_accounts/${inputName}`)).then((snapshot) => {
+                if (snapshot.exists()) {
+                    let registeredPassword = snapshot.val();
+                    if (registeredPassword === inputPassword) {
+                        currentUsername = inputName;
+                        activateVoting("LOGIN SUCCESSFUL! WELCOME BACK.", true);
+                    } else {
+                        currentUsername = "";
+                        activateVoting("INCORRECT PASSWORD FOR THIS USER!", false);
+                    }
                 } else {
-                    currentUsername = "";
-                    activateVoting("INCORRECT PASSWORD FOR THIS USER!", false);
+                    // අලුත් ප්ලේයර් කෙනෙක් නම් Firebase එකේ රෙජිස්ටර් කිරීම
+                    set(ref(database, `mojang_player_accounts/${inputName}`), inputPassword).then(() => {
+                        currentUsername = inputName;
+                        activateVoting("ACCOUNT CREATED! VOTING UNLOCKED.", true);
+                    });
                 }
-            } else {
-                // අලුත් නමෙක් නම් Account එකක් සාදනවා (REGISTER)
-                playerAccounts[inputName] = inputPassword;
-                localStorage.setItem('mojang_player_accounts', JSON.stringify(playerAccounts));
-                currentUsername = inputName;
-                activateVoting("ACCOUNT CREATED! VOTING UNLOCKED.", true);
-            }
+            }).catch((error) => {
+                statusDiv.className = "status-msg error";
+                statusDiv.innerText = "DATABASE ERROR!";
+            });
         }
 
         function activateVoting(message, isSuccess) {
@@ -276,7 +310,6 @@
                 statusDiv.className = "status-msg error";
                 statusDiv.innerText = message;
                 gridDiv.classList.remove('active-grid');
-                // වැරදුනොත් Boxes වල තියෙන Counts ටික 0 කරනවා ආරක්ෂාවට
                 const sites = ['play', 'gift', 'rank', 'rule', 'sponser'];
                 sites.forEach(site => document.getElementById('count-' + site).innerText = "0");
             }
@@ -286,12 +319,12 @@
             if (!currentUsername) return;
             const sites = ['play', 'gift', 'rank', 'rule', 'sponser'];
             sites.forEach(site => {
-                let count = serverVotes[site][currentUsername] || 0;
+                let count = (serverVotes[site] && serverVotes[site][currentUsername]) || 0;
                 document.getElementById('count-' + site).innerText = count;
             });
         }
 
-        function castVote(site) {
+        window.castVote = function(site) {
             if (!currentUsername) {
                 alert("Please login/register first!");
                 return;
@@ -301,7 +334,7 @@
             let logKey = currentUsername + "_" + site;
             let lastVotedTime = userVoteLog[logKey];
 
-            // පැය 24ක සීමාව (24 * 60 * 60 * 1000 = 86,400,000 ms)
+            // පැය 24ක සීමාව පරීක්ෂා කිරීම
             if (lastVotedTime && (now - lastVotedTime < 86400000)) {
                 let timeLeft = 86400000 - (now - lastVotedTime);
                 let hoursLeft = Math.ceil(timeLeft / (1000 * 60 * 60));
@@ -309,18 +342,16 @@
                 return;
             }
 
-            // කලින් තිබ්බ තැන ඉඳන් Count එක එකතු කිරීම
+            if (!serverVotes[site]) serverVotes[site] = {};
             if (!serverVotes[site][currentUsername]) {
                 serverVotes[site][currentUsername] = 0;
             }
             serverVotes[site][currentUsername] += 1;
-
-            // වෙලාව සටහන් කරගැනීම
             userVoteLog[logKey] = now;
 
-            // LocalStorage එකට Data Save කිරීම
-            localStorage.setItem('mojang_server_votes', JSON.stringify(serverVotes));
-            localStorage.setItem('mojang_user_vote_log', JSON.stringify(userVoteLog));
+            // Firebase එකට Live Save කිරීම
+            set(ref(database, 'mojang_server_votes'), serverVotes);
+            set(ref(database, 'mojang_user_vote_log'), userVoteLog);
 
             updateUI();
             alert("Thank you for voting on " + site.toUpperCase() + "!");
