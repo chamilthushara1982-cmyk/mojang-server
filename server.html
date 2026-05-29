@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mojang Studios - Server Specifications</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: #0f0f0f;
+            color: white;
+            font-family: 'Press Start 2P', cursive;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+        }
+
+        /* Minecraft Block 3D Spinning Animation */
+        .minecraft-animation {
+            width: 70px;
+            height: 70px;
+            margin: 20px auto 40px auto;
+            transform-style: preserve-3d;
+            animation: spinBlock 5s linear infinite;
+        }
+        .cube-face {
+            position: absolute;
+            width: 70px;
+            height: 70px;
+            border: 2px solid #000;
+        }
+        .front  { background: #8B5A2B; transform: rotateY(  0deg) translateZ(35px); border-top: 15px solid #5C8E32; }
+        .back   { background: #8B5A2B; transform: rotateY(180deg) translateZ(35px); border-top: 15px solid #5C8E32; }
+        .left   { background: #8B5A2B; transform: rotateY(-90deg) translateZ(35px); border-top: 15px solid #5C8E32; }
+        .right  { background: #8B5A2B; transform: rotateY( 90deg) translateZ(35px); border-top: 15px solid #5C8E32; }
+        .top    { background: #5C8E32; transform: rotateX( 90deg) translateZ(35px); }
+        .bottom { background: #543D2B; transform: rotateX(-90deg) translateZ(35px); }
+
+        @keyframes spinBlock {
+            0% { transform: rotateX(-20deg) rotateY(0deg); }
+            100% { transform: rotateX(-20deg) rotateY(360deg); }
+        }
+
+        h1 {
+            color: #ff3131;
+            font-size: 20px;
+            text-shadow: 0 0 10px #ff3131;
+            text-align: center;
+            margin-bottom: 40px;
+            line-height: 1.5;
+        }
+
+        .main-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
+            width: 100%;
+            max-width: 900px;
+        }
+
+        /* Sections Slide-Up Animations */
+        .info-section {
+            background: #151515;
+            border: 3px solid #ff3131;
+            padding: 30px;
+            border-radius: 4px;
+            opacity: 0;
+            transform: translateY(40px);
+            animation: slideUp 0.8s forwards;
+        }
+        .info-section:nth-child(1) { animation-delay: 0.3s; }
+        .info-section:nth-child(2) { animation-delay: 0.7s; }
+
+        @keyframes slideUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h2 {
+            color: #5865F2;
+            font-size: 14px;
+            margin-bottom: 25px;
+            border-bottom: 2px dashed #333;
+            padding-bottom: 10px;
+        }
+
+        /* Items Inside */
+        .item {
+            margin-bottom: 20px;
+            line-height: 1.8;
+        }
+        .item-title {
+            color: white;
+            font-size: 11px;
+            margin-bottom: 5px;
+        }
+        .item-desc {
+            color: #aaaaaa;
+            font-size: 9px;
+        }
+
+        /* Team Grid */
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+        }
+        .team-box {
+            background: #111;
+            border: 2px solid #ff3131;
+            padding: 20px;
+            text-align: center;
+        }
+        .role { color: #ff3131; font-size: 10px; margin-bottom: 8px;}
+        .name { color: white; font-size: 12px; margin-bottom: 8px;}
+        .duty { color: #888; font-size: 8px; }
+        .highlight-support { color: #5865F2; text-shadow: 0 0 5px #5865F2; }
+
+        .discord-btn {
+            display: block;
+            width: fit-content;
+            margin: 40px auto 0 auto;
+            background: #5865F2;
+            color: white;
+            text-decoration: none;
+            padding: 15px 30px;
+            border: 4px solid black;
+            font-size: 11px;
+            box-shadow: 0 0 15px #5865F2;
+            transition: 0.3s;
+        }
+        .discord-btn:hover {
+            background: white;
+            color: black;
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="minecraft-animation">
+        <div class="cube-face top"></div>
+        <div class="cube-face bottom"></div>
+        <div class="cube-face front"></div>
+        <div class="cube-face back"></div>
+        <div class="cube-face left"></div>
+        <div class="cube-face right"></div>
+    </div>
+
+    <h1>⚔️ MOJANG STUDIOS SPECIFICATIONS ⚔️</h1>
+
+    <div class="main-wrapper">
+        
+        <div class="info-section">
+            <h2>💬 EXCLUSIVE DISCORD PERKS</h2>
+            
+            <div class="item">
+                <div class="item-title">🎫 TICKET SUPPORT</div>
+                <div class="item-desc">Need any help? Open a support ticket instantly. Our active support team is ready to assist you 24/7.</div>
+            </div>
+
+            <div class="item">
+                <div class="item-title">👑 SPECIAL RANK ROOMS</div>
+                <div class="item-desc">Claim your custom roles and unlock high-tier VIP rooms, chats, and private channels inside the server.</div>
+            </div>
+
+            <div class="item">
+                <div class="item-title">🎵 MUSIC CHANNELS</div>
+                <div class="item-desc">Vibe with your friends! High quality 24/7 music channels and bots are available for all players.</div>
+            </div>
+        </div>
+
+        <div class="info-section">
+            <h2>👑 OUR SERVER MANAGEMENT</h2>
+            <div class="team-grid">
+                
+                <div class="team-box">
+                    <div class="role">OWNER</div>
+                    <div class="name">Mojang123</div>
+                    <div class="duty">Server Founder & Lead Developer</div>
+                </div>
+
+                <div class="team-box">
+                    <div class="role">CEO</div>
+                    <div class="name">Dinux</div>
+                    <div class="duty class highlight-support">⚡ IN CHARGE OF TICKET SUPPORT ⚡</div>
+                </div>
+
+                <div class="team-box">
+                    <div class="role">ADMIN</div>
+                    <div class="name">Glitcher z</div>
+                    <div class="duty">Community & System Security</div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <a href="https://discord.gg/bEuWdBT2c" class="discord-btn" target="_blank">CONNECT TO DISCORD</a>
+
+</body>
+</html>

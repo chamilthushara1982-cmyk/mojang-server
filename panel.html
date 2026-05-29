@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mojang Studios - Admin Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: #0f0f0f;
+            color: white;
+            font-family: 'Press Start 2P', cursive;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+        }
+
+        h1 {
+            color: #ff3131;
+            font-size: 24px;
+            text-shadow: 0 0 10px #ff3131;
+            text-align: center;
+            margin-bottom: 30px;
+            line-height: 1.4;
+        }
+
+        /* Admin Gate Login */
+        .admin-auth-box {
+            background: #111;
+            border: 4px solid #ff3131;
+            padding: 30px;
+            text-align: center;
+            width: 100%;
+            max-width: 600px;
+            box-shadow: 0 0 20px rgba(255, 49, 49, 0.2);
+        }
+
+        .admin-auth-box p {
+            font-size: 10px;
+            color: #aaa;
+            margin-bottom: 20px;
+        }
+
+        .input-field {
+            margin-bottom: 20px;
+        }
+
+        .input-field label {
+            display: block;
+            font-size: 9px;
+            color: #ff3131;
+            margin-bottom: 8px;
+            text-align: left;
+            padding-left: 10%;
+        }
+
+        input[type="text"], input[type="password"] {
+            padding: 12px;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 11px;
+            border: 3px solid black;
+            background: #222;
+            color: white;
+            outline: none;
+            width: 80%;
+            text-align: center;
+        }
+
+        .login-btn {
+            padding: 15px 25px;
+            background: #ff3131;
+            color: white;
+            border: 3px solid black;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 11px;
+            cursor: pointer;
+            width: 80%;
+            transition: 0.3s;
+        }
+
+        .login-btn:hover {
+            background: white;
+            color: black;
+        }
+
+        .error-msg {
+            color: #ff3131;
+            font-size: 10px;
+            margin-top: 15px;
+        }
+
+        /* Admin Dashboard Layout */
+        .dashboard-container {
+            display: none; /* Login වෙනකන් හංගනවා */
+            width: 100%;
+            max-width: 1200px;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Stats Cards */
+        .summary-bar {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+
+        .stat-card {
+            background: #151515;
+            border: 2px solid #5865F2;
+            padding: 20px;
+            flex: 1;
+            min-width: 250px;
+            text-align: center;
+            font-size: 11px;
+        }
+        .stat-card span {
+            display: block;
+            font-size: 20px;
+            color: #ff3131;
+            margin-top: 10px;
+        }
+
+        /* Database Table */
+        .table-wrapper {
+            background: #111;
+            border: 3px solid #ff3131;
+            overflow-x: auto;
+            width: 100%;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 9px;
+            min-width: 900px;
+        }
+
+        th, td {
+            padding: 15px;
+            border: 1px solid #222;
+            line-height: 1.5;
+        }
+
+        th {
+            background: #1a1a1a;
+            color: #ff3131;
+            border-bottom: 3px solid #ff3131;
+        }
+
+        tr:nth-child(even) {
+            background: #161616;
+        }
+
+        /* Rank Badges */
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            font-size: 8px;
+            margin: 2px;
+            border: 1px solid black;
+            color: white;
+        }
+        .badge-vip { background: #e5c158; color: black; }     /* Gold */
+        .badge-team { background: #ff3131; }                  /* Red */
+        .badge-18 { background: #b967ff; }                    /* Purple */
+        .badge-none { color: #555; }
+
+    </style>
+</head>
+<body>
+
+    <h1>🚨 MOJANG STUDIOS ADMIN PANEL 🚨</h1>
+
+    <!-- 1. Admin Secure Login Gate -->
+    <div class="admin-auth-box" id="admin-login-gate">
+        <p>SECURE AREA: AUTHORIZED ADMIN PERSONNEL ONLY</p>
+        
+        <div class="input-field">
+            <label>ADMIN USERNAME:</label>
+            <input type="text" id="admin-user" placeholder="Username...">
+        </div>
+
+        <div class="input-field">
+            <label>SECRET PASSWORD:</label>
+            <input type="password" id="admin-pass" placeholder="Password...">
+        </div>
+
+        <button class="login-btn" onclick="checkAdminLogin()">ACCESS DASHBOARD</button>
+        <div id="error-output" class="error-msg"></div>
+    </div>
+
+    <!-- 2. Main Admin Dashboard -->
+    <div class="dashboard-container" id="admin-dashboard">
+        
+        <!-- Top Overview Summary -->
+        <div class="summary-bar">
+            <div class="stat-card">
+                TOTAL REGISTERED PLAYERS
+                <span id="stat-players">0</span>
+            </div>
+            <div class="stat-card" style="border-color: #5C8E32;">
+                TOTAL SERVER VOTES
+                <span id="stat-votes" style="color: #5C8E32;">0</span>
+            </div>
+        </div>
+
+        <!-- Players Progress Database Table -->
+        <h2>👤 PLAYER VOTES & PROGRESS DATABASE</h2>
+        <br>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>USERNAME</th>
+                        <th>PLAY.MC</th>
+                        <th>GIFT.LK</th>
+                        <th>RANK.INFO</th>
+                        <th>RULE.NET</th>
+                        <th>SPONSER.COM</th>
+                        <th style="color: white;">TOTAL POINTS</th>
+                        <th>ELIGIBLE RANKS</th>
+                    </tr>
+                </thead>
+                <tbody id="player-table-body">
+                    <!-- JavaScript මඟින් දත්ත මෙතනට Auto එකතු කරයි -->
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <script>
+        function checkAdminLogin() {
+            let user = document.getElementById('admin-user').value.trim();
+            let pass = document.getElementById('admin-pass').value.trim();
+            let errorDiv = document.getElementById('error-output');
+
+            // ඔයා දුන්න නිවැරදි ඇඩ්මින් ලොගින් විස්තර
+            if (user === "Admin123" && pass === "Koc574501") {
+                errorDiv.innerText = "";
+                document.getElementById('admin-login-gate').style.display = 'none'; // Login එක හංගනවා
+                document.getElementById('admin-dashboard').style.display = 'block'; // Dashboard එක අරිනවා
+                
+                loadServerData(); // සේවාදායකයන්ගේ දත්ත Load කරනවා
+            } else {
+                errorDiv.innerText = "ACCESS DENIED: INVALID ADMIN CREDENTIALS!";
+            }
+        }
+
+        function loadServerData() {
+            // LocalStorage වලින් Accounts සහ Votes දත්ත ලබාගැනීම
+            let playerAccounts = JSON.parse(localStorage.getItem('mojang_player_accounts')) || {};
+            let serverVotes = JSON.parse(localStorage.getItem('mojang_server_votes')) || {
+                play: {}, gift: {}, rank: {}, rule: {}, sponser: {}
+            };
+
+            let tableBody = document.getElementById('player-table-body');
+            tableBody.innerHTML = ""; // පරණ දත්ත ක්ලියර් කිරීම
+
+            let totalPlayersCount = 0;
+            let totalServerVotesCount = 0;
+
+            // හැම Player කෙනෙක්වම එකින් එක Check කිරීම
+            for (let player in playerAccounts) {
+                totalPlayersCount++;
+
+                // එක් එක් සයිට් එකට අදාළ ඡන්ද ගණන් ගැනීම
+                let vPlay = serverVotes['play'][player] || 0;
+                let vGift = serverVotes['gift'][player] || 0;
+                let vRank = serverVotes['rank'][player] || 0;
+                let vRule = serverVotes['rule'][player] || 0;
+                let vSponser = serverVotes['sponser'][player] || 0;
+
+                let playerTotal = vPlay + vGift + vRank + vRule + vSponser;
+                totalServerVotesCount += playerTotal;
+
+                // Rank එක Unlock වෙලාද නැද්ද බලන එක (Store එකේ ගණන් වලට අනුව)
+                let rankBadges = "";
+                if (playerTotal >= 150) rankBadges += '<span class="badge badge-18">🔞 18+</span>';
+                if (playerTotal >= 200) rankBadges += '<span class="badge badge-team">🛡️ Team</span>';
+                if (playerTotal >= 250) rankBadges += '<span class="badge badge-vip">👑 VIP</span>';
+                
+                if (rankBadges === "") {
+                    rankBadges = '<span class="badge-none">No Ranks Yet</span>';
+                }
+
+                // Table එකට අලුත් පේළියක් (Row) එකතු කිරීම
+                let row = `<tr>
+                    <td style="color: #5865F2; font-weight: bold;">${player.toUpperCase()}</td>
+                    <td>${vPlay}</td>
+                    <td>${vGift}</td>
+                    <td>${vRank}</td>
+                    <td>${vRule}</td>
+                    <td>${vSponser}</td>
+                    <td style="color: #ff3131; font-weight: bold; font-size: 11px;">${playerTotal}</td>
+                    <td>${rankBadges}</td>
+                </tr>`;
+                
+                tableBody.innerHTML += row;
+            }
+
+            // උඩ තියෙන Summary කාඩ් වලට ගණන් අප්ඩේට් කිරීම
+            document.getElementById('stat-players').innerText = totalPlayersCount;
+            document.getElementById('stat-votes').innerText = totalServerVotesCount;
+
+            // කිසිම ප්ලේයර් කෙනෙක් නැත්නම් මැසේජ් එකක් පෙන්වීම
+            if (totalPlayersCount === 0) {
+                tableBody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:#555; padding:30px;">NO PLAYER DATA FOUND IN DATABASE.</td></tr>`;
+            }
+        }
+    </script>
+
+</body>
+</html>

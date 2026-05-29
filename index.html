@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Mojang Studios</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    font-family:'Press Start 2P', cursive;
+    background:#0f0f0f;
+    color:white;
+    overflow-x:hidden;
+}
+
+/* Animated Background */
+
+body::before{
+    content:"";
+    position:fixed;
+    width:200%;
+    height:200%;
+    background:
+    linear-gradient(45deg,#ff3131 25%,transparent 25%),
+    linear-gradient(-45deg,#ff3131 25%,transparent 25%),
+    linear-gradient(45deg,transparent 75%,#ff3131 75%),
+    linear-gradient(-45deg,transparent 75%,#ff3131 75%);
+    background-size:80px 80px;
+    opacity:0.04;
+    animation:bgmove 15s linear infinite;
+    z-index:-1;
+}
+
+@keyframes bgmove{
+    0%{
+        transform:translate(0,0);
+    }
+    100%{
+        transform:translate(-80px,-80px);
+    }
+}
+
+/* Navbar */
+
+nav{
+    width:100%;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:25px 50px;
+    background:#111;
+    border-bottom:4px solid #ff3131;
+    position:sticky;
+    top:0;
+    z-index:1000;
+}
+
+.logo{
+    font-size:18px;
+    color:#ff3131;
+    text-shadow:0 0 10px #ff3131;
+}
+
+nav ul{
+    display:flex;
+    list-style:none;
+    gap:25px;
+}
+
+nav a{
+    text-decoration:none;
+    color:white;
+    transition:0.3s;
+}
+
+nav a:hover{
+    color:#ff3131;
+}
+
+/* Hero */
+
+.hero{
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    flex-direction:column;
+    text-align:center;
+    padding:20px;
+}
+
+.hero h1{
+    font-size:55px;
+    color:#ff3131;
+    margin-bottom:40px;
+    text-shadow:0 0 20px #ff3131;
+    animation:glow 2s infinite alternate;
+}
+
+@keyframes glow{
+    from{
+        text-shadow:0 0 10px #ff3131;
+    }
+    to{
+        text-shadow:0 0 35px #ff3131;
+    }
+}
+
+.hero p{
+    max-width:850px;
+    line-height:2;
+    color:#cccccc;
+    margin-bottom:50px;
+    font-size:12px;
+}
+
+/* Buttons */
+
+.buttons{
+    display:flex;
+    gap:25px;
+    flex-wrap:wrap;
+    justify-content:center;
+}
+
+.btn{
+    padding:18px 35px;
+    text-decoration:none;
+    color:white;
+    background:#ff3131;
+    border:4px solid black;
+    transition:0.3s;
+    box-shadow:0 0 20px #ff3131;
+}
+
+.btn:hover{
+    transform:scale(1.1);
+    background:white;
+    color:black;
+}
+
+.btn2{
+    background:#5865F2;
+    box-shadow:0 0 20px #5865F2;
+}
+
+/* Features */
+
+.features{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+    gap:30px;
+    padding:80px 50px;
+}
+
+.card{
+    background:#151515;
+    border:3px solid #ff3131;
+    padding:40px;
+    text-align:center;
+    transition:0.3s;
+}
+
+.card:hover{
+    transform:translateY(-10px);
+    box-shadow:0 0 25px #ff3131;
+}
+
+.card h2{
+    color:#ff3131;
+    margin-bottom:25px;
+    font-size:15px;
+}
+
+.card p{
+    color:#cccccc;
+    line-height:2;
+    font-size:10px;
+}
+
+/* Discord Section */
+
+.discord{
+    padding:100px 30px;
+    text-align:center;
+    background:#111;
+    border-top:4px solid #ff3131;
+    border-bottom:4px solid #ff3131;
+}
+
+.discord h1{
+    color:#5865F2;
+    margin-bottom:30px;
+    font-size:30px;
+}
+
+.discord p{
+    color:#cccccc;
+    line-height:2;
+    margin-bottom:40px;
+    font-size:11px;
+}
+
+/* Footer */
+
+footer{
+    text-align:center;
+    padding:40px;
+    background:#0a0a0a;
+    color:#888;
+    font-size:10px;
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- index.html ඇතුලේ Navbar එක මේ විදිහට වෙනස් කරන්න -->
+<nav>
+<div class="logo">MOJANG STUDIOS</div>
+<ul>
+<li><a href="#">Home</a></li>
+<li><a href="store.html" target="_blank">Store</a></li>
+<li><a href="https://discord.gg/bEuWdBT2c" target="_blank">Discord</a></li>
+<li><a href="vote.html" target="_blank">Vote</a></li>
+<li><a href="panel.html" target="_blank" style="color: #ff3131;">Admin Panel</a></li> <!-- මෙන්න මේක අලුතින් එකතු කරන්න -->
+</ul>
+</nav>
+
+<section class="hero">
+<h1>MOJANG STUDIOS</h1>
+<p>
+Best Minecraft Community Server With 
+Events, Giveaways, Crates, Economy And Amazing Players.
+Join Our Discord And Start Your Adventure Today.
+</p>
+
+<div class="buttons">
+<a href="server.html" target="_blank" class="btn">JOIN SERVER</a>
+<a href="https://discord.gg/bEuWdBT2c" class="btn btn2" target="_blank">JOIN DISCORD</a>
+</div>
+</section>
+
+<section class="features">
+<div class="card">
+<h2>💎 NITRO GIVEAWAYS</h2>
+<p>Get a chance to win free Discord Nitro, epic perks, and exclusive roles by participating in our regular community events.</p>
+</div>
+
+<div class="card">
+<h2>🔥 RELOADED GIFS</h2>
+<p>Express yourself with freshly updated gaming GIFs, custom server emojis, and high-quality media shared daily by players.</p>
+</div>
+
+<div class="card">
+<h2>🎮 MC UPDATES</h2>
+<p>Stay tracking with the latest patch notes, server upgrades, and fresh Minecraft updates to keep your gameplay smooth.</p>
+</div>
+</section>
+
+<section class="discord">
+<h1>JOIN OUR DISCORD</h1>
+<p>Meet the community, get updates, join giveaways and talk with other players.</p>
+<a href="https://discord.gg/bEuWdBT2c" class="btn btn2" target="_blank">DISCORD SERVER</a>
+</section>
+
+<footer>
+© 2026 Mojang Studios | All Rights Reserved
+</footer>
+
+</body>
+</html>

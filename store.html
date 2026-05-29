@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mojang Studios - Rank Store</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: #0f0f0f;
+            color: white;
+            font-family: 'Press Start 2P', cursive;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        h1 {
+            color: #ff3131;
+            font-size: 24px;
+            text-shadow: 0 0 10px #ff3131;
+            text-align: center;
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+
+        .sub-title {
+            font-size: 9px;
+            color: #888;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        /* Security Login Section */
+        .auth-section {
+            background: #111;
+            border: 3px solid #ff3131;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 40px;
+            width: 100%;
+            max-width: 650px;
+            box-shadow: 0 0 15px rgba(255, 49, 49, 0.1);
+        }
+
+        .auth-section p {
+            font-size: 10px;
+            color: #aaa;
+            margin-bottom: 20px;
+            line-height: 1.8;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 9px;
+            color: #ff3131;
+            margin-bottom: 8px;
+            text-align: left;
+            padding-left: 15%;
+        }
+
+        input[type="text"], input[type="password"] {
+            padding: 12px;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 11px;
+            border: 3px solid black;
+            background: #222;
+            color: white;
+            outline: none;
+            width: 70%;
+            text-align: center;
+        }
+
+        .input-btn {
+            padding: 15px 25px;
+            background: #ff3131;
+            color: white;
+            border: 3px solid black;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 10px;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+            width: 70%;
+        }
+
+        .input-btn:hover {
+            background: white;
+            color: black;
+        }
+
+        /* Player Stats Summary */
+        .player-stats {
+            background: #111;
+            border: 3px dashed #5865F2;
+            padding: 15px 30px;
+            margin-bottom: 40px;
+            font-size: 11px;
+            color: #5865F2;
+            text-align: center;
+            display: none; /* Login වෙනකන් හංගනවා */
+            width: 100%;
+            max-width: 650px;
+        }
+        .player-stats span {
+            color: white;
+        }
+
+        /* Store Grid and Cards */
+        .store-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            width: 100%;
+            max-width: 1000px;
+            opacity: 0.1; /* මුලින්ම ලොග් වෙනකන් Blur */
+            pointer-events: none;
+            transition: 0.5s;
+        }
+
+        .active-grid {
+            opacity: 1 !important;
+            pointer-events: auto !important;
+        }
+
+        .store-card {
+            background: #151515;
+            border: 3px solid #333;
+            padding: 30px 20px;
+            text-align: center;
+            position: relative;
+            transition: 0.3s;
+        }
+
+        /* විවිධ Ranks වලට වෙනස් පාටවල් */
+        .rank-vip { border-color: #e5c158; } /* Gold */
+        .rank-team { border-color: #ff3131; } /* Red */
+        .rank-18 { border-color: #b967ff; } /* Purple */
+
+        .store-card h2 {
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+        .rank-vip h2 { color: #e5c158; text-shadow: 0 0 5px rgba(229,193,88,0.3); }
+        .rank-team h2 { color: #ff3131; text-shadow: 0 0 5px rgba(255,49,49,0.3); }
+        .rank-18 h2 { color: #b967ff; text-shadow: 0 0 5px rgba(185,103,255,0.3); }
+
+        .requirement {
+            font-size: 10px;
+            color: #aaa;
+            margin-bottom: 20px;
+        }
+        .requirement b { color: white; }
+
+        /* Progress Bar */
+        .progress-container {
+            background: #222;
+            border: 2px solid #000;
+            height: 20px;
+            width: 100%;
+            margin-bottom: 15px;
+            position: relative;
+        }
+        .progress-bar {
+            background: #5C8E32; /* Green */
+            height: 100%;
+            width: 0%;
+            transition: width 0.5s ease-in-out;
+        }
+        .progress-text {
+            position: absolute;
+            width: 100%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 8px;
+            color: white;
+        }
+
+        /* Claim Buttons */
+        .claim-btn {
+            padding: 12px 15px;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 9px;
+            border: 3px solid black;
+            width: 100%;
+            cursor: not-allowed;
+            background: #444;
+            color: #888;
+            transition: 0.3s;
+        }
+
+        .unlocked-btn {
+            background: #5C8E32 !important;
+            color: white !important;
+            cursor: pointer !important;
+            box-shadow: 0 0 15px #5C8E32;
+        }
+        .unlocked-btn:hover {
+            background: white !important;
+            color: black !important;
+        }
+
+        .status-msg {
+            font-size: 10px;
+            margin-top: 20px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .success { color: #5C8E32; }
+        .error { color: #ff3131; }
+
+        /* Confetti Animation Effect Elements */
+        .confetti {
+            position: fixed;
+            width: 8px;
+            height: 8px;
+            background-color: #5C8E32;
+            z-index: 9999;
+            animation: fall 3s linear infinite;
+        }
+        @keyframes fall {
+            0% { transform: translateY(-50px) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>🛒 MOJANG RANK STORE 🛒</h1>
+    <div class="sub-title">USE YOUR VOTE POINTS TO CLAIM PREMIUM RANKS</div>
+
+    <!-- Security Gate Section -->
+    <div class="auth-section" id="login-box">
+        <p>ENTER YOUR VOTE SITE USERNAME & PASSWORD TO ACCESS THE STORE</p>
+        
+        <div class="input-group">
+            <label>MINECRAFT USERNAME:</label>
+            <input type="text" id="store-name" placeholder="Enter Username...">
+        </div>
+
+        <div class="input-group">
+            <label>SECURITY PASSWORD:</label>
+            <input type="password" id="store-pass" placeholder="Enter Password...">
+        </div>
+
+        <button class="input-btn" onclick="verifyStoreLogin()">ENTER STORE</button>
+        <div id="status-msg" class="status-msg"></div>
+    </div>
+
+    <!-- Live Player Votes Summary -->
+    <div class="player-stats" id="stats-bar">
+        CONNECTED PLAYER: <span id="display-player">NONE</span> | TOTAL VOTE POINTS: <span id="total-points">0</span>
+    </div>
+
+    <!-- Store Products Boxes Grid -->
+    <div class="store-grid" id="store-box-grid">
+        
+        <!-- Box 1: VIP Rank -->
+        <div class="store-card rank-vip">
+            <h2>👑 VIP RANK</h2>
+            <div class="requirement">Required: <b>250 Votes</b></div>
+            <div class="progress-container">
+                <div class="progress-bar" id="bar-vip"></div>
+                <div class="progress-text" id="text-vip">0 / 250</div>
+            </div>
+            <button class="claim-btn" id="btn-vip" onclick="claimRank('VIP', 250)">LOCKED</button>
+        </div>
+
+        <!-- Box 2: Mojang Team -->
+        <div class="store-card rank-team">
+            <h2>🛡️ MOJANG TEAM</h2>
+            <div class="requirement">Required: <b>200 Votes</b></div>
+            <div class="progress-container">
+                <div class="progress-bar" id="bar-team"></div>
+                <div class="progress-text" id="text-team">0 / 200</div>
+            </div>
+            <button class="claim-btn" id="btn-team" onclick="claimRank('Mojang Team', 200)">LOCKED</button>
+        </div>
+
+        <!-- Box 3: 18+ Rank -->
+        <div class="store-card rank-18">
+            <h2>🔞 18+ RANK</h2>
+            <div class="requirement">Required: <b>150 Votes</b></div>
+            <div class="progress-container">
+                <div class="progress-bar" id="bar-18"></div>
+                <div class="progress-text" id="text-18">0 / 150</div>
+            </div>
+            <button class="claim-btn" id="btn-18" onclick="claimRank('18+', 150)">LOCKED</button>
+        </div>
+
+    </div>
+
+    <script>
+        let verifiedUser = "";
+        let playerTotalVotes = 0;
+
+        function verifyStoreLogin() {
+            let uName = document.getElementById('store-name').value.trim().toLowerCase();
+            let pPass = document.getElementById('store-pass').value.trim();
+            let statusDiv = document.getElementById('status-msg');
+
+            // Vote එකේ හදපු accounts database එක LocalStorage එකෙන් ගන්නවා
+            let playerAccounts = JSON.parse(localStorage.getItem('mojang_player_accounts')) || {};
+
+            if (uName === "" || pPass === "") {
+                statusDiv.className = "status-msg error";
+                statusDiv.innerText = "FILL ALL SECURE FIELDS!";
+                return;
+            }
+
+            // Account එකක් තියෙනවද සහ Password එක හරිද බලනවා
+            if (playerAccounts[uName] && playerAccounts[uName] === pPass) {
+                verifiedUser = uName;
+                statusDiv.innerText = "";
+                document.getElementById('login-box').style.display = 'none'; // Login Box එක හංගනවා
+                document.getElementById('stats-bar').style.display = 'block'; // Stats Bar එක පෙන්වනවා
+                document.getElementById('display-player').innerText = verifiedUser.toUpperCase();
+                
+                document.getElementById('store-box-grid').classList.add('active-grid'); // Store එක open කරනවා
+                
+                calculateTotalVotes();
+                setupStoreUI();
+            } else {
+                statusDiv.className = "status-msg error";
+                statusDiv.innerText = "INVALID USERNAME OR PASSWORD! VOTE FIRST.";
+            }
+        }
+
+        function calculateTotalVotes() {
+            // Vote සයිට් එකේ සේව් වුණු මුළු සර්වර් Votes Database එක
+            let serverVotes = JSON.parse(localStorage.getItem('mojang_server_votes')) || {};
+            playerTotalVotes = 0;
+
+            // සයිට් 5න්ම මේ යූසර්ට ලැබිලා තියෙන Votes ඔක්කොම එකතු කරනවා
+            for (let site in serverVotes) {
+                if (serverVotes[site][verifiedUser]) {
+                    playerTotalVotes += serverVotes[site][verifiedUser];
+                }
+            }
+            document.getElementById('total-points').innerText = playerTotalVotes;
+        }
+
+        function setupStoreUI() {
+            // Ranks වල දත්ත සැකසුම්
+            const ranks = [
+                { id: 'vip', target: 250, btn: document.getElementById('btn-vip'), bar: document.getElementById('bar-vip'), txt: document.getElementById('text-vip') },
+                { id: 'team', target: 200, btn: document.getElementById('btn-team'), bar: document.getElementById('bar-team'), txt: document.getElementById('text-team') },
+                { id: '18', target: 150, btn: document.getElementById('btn-18'), bar: document.getElementById('bar-18'), txt: document.getElementById('text-18') }
+            ];
+
+            ranks.forEach(rank => {
+                // Progress ප්‍රතිශතය හැදීම
+                let percentage = (playerTotalVotes / rank.target) * 100;
+                if (percentage > 100) percentage = 100;
+
+                rank.bar.style.width = percentage + "%";
+                rank.txt.innerText = playerTotalVotes + " / " + rank.target;
+
+                // අවශ්‍ය ඡන්ද ප්‍රමාණය සම්පූර්ණ නම් Button එක Unlock කරනවා
+                if (playerTotalVotes >= rank.target) {
+                    rank.btn.innerText = "CLAIM RANK";
+                    rank.btn.classList.add('unlocked-btn');
+                } else {
+                    rank.btn.innerText = "LOCKED";
+                    rank.btn.classList.remove('unlocked-btn');
+                }
+            });
+        }
+
+        function claimRank(rankName, cost) {
+            if (playerTotalVotes < cost) {
+                alert("You don't have enough Vote Points!");
+                return;
+            }
+
+            // Green Confetti Animation එක සක්‍රීය කිරීම
+            triggerConfettiEffect();
+
+            // Success Message එක පෙන්වීම
+            alert("🎉 CONGRATULATIONS! 🎉\n\nYou successfully claimed the " + rankName.toUpperCase() + " rank!\n\n👉 PLEASE CONTACT ADMIN ON DISCORD WITH YOUR SCREENSHOT TO ACTIVATE IT.");
+        }
+
+        // කොළ පාට කැබලි අහසින් වැටෙන සුපිරි Animation එක
+        function triggerConfettiEffect() {
+            for (let i = 0; i < 100; i++) {
+                let confettiNode = document.createElement('div');
+                confettiNode.className = 'confetti';
+                confettiNode.style.left = Math.random() * 100 + 'vw';
+                confettiNode.style.animationDelay = Math.random() * 2 + 's';
+                confettiNode.style.backgroundColor = '#' + Math.floor(Math.random()*16777215).toString(16); // Random Colors
+                document.body.appendChild(confettiNode);
+
+                // තත්පර 4කට පස්සේ ඒවා අයින් කරනවා
+                setTimeout(() => { confettiNode.remove(); }, 4000);
+            }
+        }
+    </script>
+
+</body>
+</html>
